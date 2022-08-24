@@ -25,6 +25,7 @@
         android:layout_gravity="center"
         android:maxLines="1"
         android:inputType="numberDecimal"
-        android:focusable="true" />
+        android:focusable="true"
+        android:textAlignment="center" />
 
 </com.google.android.material.card.MaterialCardView>

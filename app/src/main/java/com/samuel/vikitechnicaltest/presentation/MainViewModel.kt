@@ -113,6 +113,9 @@ class MainViewModel @Inject constructor(
                 }
                 if (response.isSuccessful && response.body() != null) {
                     response.body()?.let { body ->
+                        Log.d(TAG, "getExchangeRates: number of countries (getCountryCodeRateList): ${body.conversion_rates.getCountryCodeRateList().size}")
+                        Log.d(TAG, "getExchangeRates: number of countries (getRatesList): ${body.conversion_rates.getRatesList().size}")
+                        Log.d(TAG, "getExchangeRates: number of countries (getCountryCodes): ${getCountryCodes().size}")
                         for ((countryCode, rate) in body.conversion_rates.getCountryCodeRateList()) {
                             // save to datastore
                             datastoreManager.setValue(countryCode, rate)
