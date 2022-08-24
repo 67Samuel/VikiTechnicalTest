@@ -1,4 +1,4 @@
-package com.samuel.vikitechnicaltest.presentation.main
+package com.samuel.vikitechnicaltest.presentation
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle

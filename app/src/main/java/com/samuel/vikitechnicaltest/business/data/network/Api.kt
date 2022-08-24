@@ -1,7 +1,6 @@
 package com.samuel.vikitechnicaltest.business.data.network
 
 import com.samuel.vikitechnicaltest.BuildConfig
-import com.samuel.vikitechnicaltest.R
 import com.samuel.vikitechnicaltest.business.domain.models.ExchangeRate
 import retrofit2.Response
 import retrofit2.http.GET

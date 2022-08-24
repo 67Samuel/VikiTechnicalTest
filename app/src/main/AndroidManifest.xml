@@ -17,7 +17,7 @@
         android:theme="@style/Theme.VikiTechnicalTest"
         tools:targetApi="31">
         <activity
-            android:name=".presentation.main.MainActivity"
+            android:name=".presentation.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

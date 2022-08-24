@@ -2,14 +2,24 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/mainFragment">
+    app:startDestination="@id/homeFragment">
 
     <fragment
-        android:id="@+id/mainFragment"
-        android:name="com.samuel.vikitechnicaltest.presentation.main.MainFragment"
-        android:label="MainFragment"
-        app:popEnterAnim="@anim/slide_in_left"
-        app:popExitAnim="@anim/slide_out_right"
+        android:id="@+id/homeFragment"
+        android:name="com.samuel.vikitechnicaltest.presentation.home.HomeFragment"
+        android:label="HomeFragment"
         app:enterAnim="@anim/slide_in_right"
-        app:exitAnim="@anim/slide_out_left"/>
+        app:exitAnim="@anim/slide_out_left"
+        app:popEnterAnim="@anim/slide_in_left"
+        app:popExitAnim="@anim/slide_out_right">
+        <action
+            android:id="@+id/action_mainFragment_to_selectCountryFragment"
+            app:destination="@id/selectCountryFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/selectCountryFragment"
+        android:name="com.samuel.vikitechnicaltest.presentation.selectcountry.SelectCountryFragment"
+        android:label="SelectCountryFragment" />
 </navigation>

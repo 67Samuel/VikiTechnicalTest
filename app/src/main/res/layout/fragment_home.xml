@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingTop="20dp"
+    android:gravity="center_horizontal">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginHorizontal="10dp">
+
+        <include
+            layout="@layout/country_card"
+            android:id="@+id/from_country"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_baseline_arrow_right_alt_50"/>
+
+        <include
+            layout="@layout/country_card"
+            android:id="@+id/to_country"/>
+
+    </LinearLayout>
+
+    <include
+        layout="@layout/input_card"
+        android:id="@+id/input_card"
+        android:visibility="visible"/>
+
+    <include
+        layout="@layout/result_card"
+        android:id="@+id/result"
+        android:visibility="gone"/>
+
+
+</LinearLayout>

@@ -5,11 +5,13 @@ interface AppDataStore {
 
     fun setValue(
         key: String,
-        value: String
+        value: Float
     )
 
     suspend fun readValue(
         key: String,
-    ): String?
+    ): Float?
+
+
 
 }

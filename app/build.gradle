@@ -91,6 +91,12 @@ dependencies {
     // Datastore
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
+    // Circular ImageView
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
+
+    // reflect
+    implementation "org.jetbrains.kotlin:kotlin-reflect:1.7.10"
+
 }
 
 kapt {
