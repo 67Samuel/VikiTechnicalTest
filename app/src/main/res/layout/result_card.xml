@@ -22,29 +22,27 @@
             android:id="@+id/from_amount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="$100.00"
-            android:textSize="30sp"
+            android:text="100.00 SGD"
+            android:textSize="25sp"
             android:textStyle="bold"
             android:textColor="@color/black"
-            android:layout_gravity="center"
-            android:maxLines="1"/>
+            android:layout_gravity="center"/>
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_baseline_arrow_right_alt_50"
+            android:src="@drawable/arrow_right"
             android:layout_marginHorizontal="10dp"/>
 
         <TextView
             android:id="@+id/to_amount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="$100.00"
-            android:textSize="30sp"
+            android:text="100.00 SGD"
+            android:textSize="25sp"
             android:textStyle="bold"
             android:textColor="@color/black"
-            android:layout_gravity="center"
-            android:maxLines="1"/>
+            android:layout_gravity="center"/>
 
     </LinearLayout>
 

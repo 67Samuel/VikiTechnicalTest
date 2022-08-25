@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">VikiTechnicalTest</string>
+    <string name="reset">RESET</string>
+    <string name="input_amount_hint">Amount</string>
 </resources>

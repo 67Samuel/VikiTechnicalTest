@@ -10,6 +10,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.samuel.vikitechnicaltest.R
 import com.samuel.vikitechnicaltest.business.data.datastore.AppDataStore
 import com.samuel.vikitechnicaltest.databinding.FragmentHomeBinding
 import com.samuel.vikitechnicaltest.presentation.MainViewModel
@@ -40,40 +41,39 @@ class HomeFragment() : Fragment(com.samuel.vikitechnicaltest.R.layout.fragment_h
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "onViewCreated: called")
         binding = FragmentHomeBinding.bind(view)
-        binding.fromCountry.root.setOnClickListener {
-            Log.d(TAG, "onViewCreated: going to select from country")
-            val bundle = bundleOf("direction" to SelectCountryEvents.CountryDirection.FROM.name)
-            findNavController().navigate(com.samuel.vikitechnicaltest.R.id.action_homeFragment_to_selectCountryFragment, bundle)
-        }
-        binding.toCountry.root.setOnClickListener {
-            Log.d(TAG, "onViewCreated: going to select to country")
-            val bundle = bundleOf("direction" to SelectCountryEvents.CountryDirection.TO.name)
-            findNavController().navigate(com.samuel.vikitechnicaltest.R.id.action_homeFragment_to_selectCountryFragment, bundle)
-        }
-        binding.inputCard.editText.onSubmit {
-            Log.d(TAG, "onSubmit: called")
-            CoroutineScope(Main).launch {
-                requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
-                calculateAndShowConversion()
-            }
-        }
-        binding.resetBtn.setOnClickListener {
-            binding.resultCard.fromAmount.text = ""
-            binding.resultCard.toAmount.text = ""
-            binding.inputCard.root.visibility = VISIBLE
-            binding.resultInfo.visibility = GONE
-            binding.inputCard.editText.requestFocus()
-            requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
-        }
+        setListeners()
         subscribeObservers()
 
         // bring up the soft keyboard on start
         binding.inputCard.editText.requestFocus()
         requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+    }
 
-//        collectLatestLifecycleFlow(viewModel.networkMonitor.isConnected as StateFlow<Boolean>) {
-//            Toast.makeText(requireActivity(), "Connected: $it", Toast.LENGTH_LONG).show()
-//        }
+    private fun setListeners() {
+        binding.apply{
+            fromCountry.root.setOnClickListener {
+                val bundle = bundleOf("direction" to SelectCountryEvents.CountryDirection.FROM.name)
+                findNavController().navigate(com.samuel.vikitechnicaltest.R.id.action_homeFragment_to_selectCountryFragment, bundle)
+            }
+            toCountry.root.setOnClickListener {
+                val bundle = bundleOf("direction" to SelectCountryEvents.CountryDirection.TO.name)
+                findNavController().navigate(com.samuel.vikitechnicaltest.R.id.action_homeFragment_to_selectCountryFragment, bundle)
+            }
+            inputCard.editText.onSubmit {
+                CoroutineScope(Main).launch {
+                    requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
+                    calculateAndShowConversion()
+                }
+            }
+            resetBtn.setOnClickListener {
+                resultCard.fromAmount.text = ""
+                resultCard.toAmount.text = ""
+                inputCard.root.visibility = VISIBLE
+                resultInfo.visibility = GONE
+                inputCard.editText.requestFocus()
+                requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+            }
+        }
     }
 
     private suspend fun calculateAndShowConversion() {
@@ -88,15 +88,14 @@ class HomeFragment() : Fragment(com.samuel.vikitechnicaltest.R.layout.fragment_h
                     readValue(fromCountryCode)?.let { fromExchangeRate ->
                         readValue(toCountryCode)?.let { toExchangeRate ->
                             val fromAmount = (number * 100f).roundToInt() / 100f
-                            val toAmount = ((number * fromExchangeRate) / toExchangeRate * 100f).roundToInt() / 100f
-                            Log.d(TAG,
-                                "calculateAndShowConversion: number: $number, fromExchangeRate: $fromExchangeRate," +
-                                        " toExchangeRate: $toExchangeRate, toAmount: $toAmount")
+                            val toAmount = ((number / fromExchangeRate) * toExchangeRate * 100f).roundToInt() / 100f
                             withContext(Main) {
                                 binding.inputCard.root.visibility = GONE
                                 binding.resultInfo.visibility = VISIBLE
-                                binding.resultCard.fromAmount.text = fromAmount.toString()
-                                binding.resultCard.toAmount.text = toAmount.toString()
+                                val fromAmountString = "$fromAmount $fromCountryCode"
+                                binding.resultCard.fromAmount.text = fromAmountString
+                                val toAmountString = "$toAmount $toCountryCode"
+                                binding.resultCard.toAmount.text = toAmountString
                             }
                         } ?: run { Log.d(TAG, "calculateAndShowConversion: toExchangeRate is null")}
                     } ?: run { Log.d(TAG, "calculateAndShowConversion: fromExchangeRate is null") }
@@ -121,47 +120,5 @@ class HomeFragment() : Fragment(com.samuel.vikitechnicaltest.R.layout.fragment_h
                 binding.toCountry.image.setImageResource(it.imageId)
             }
         }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.d(TAG, "onPause: called")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.d(TAG, "onStop: called")
-    }
-
-
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        Log.d(TAG, "onSaveInstanceState: called")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d(TAG, "onDestroy: called")
-    }
-
-    override fun onViewStateRestored(savedInstanceState: Bundle?) {
-        super.onViewStateRestored(savedInstanceState)
-        Log.d(TAG, "onViewStateRestored: called")
-    }
-
-    override fun onStart() {
-        super.onStart()
-        Log.d(TAG, "onStart: called")
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.d(TAG, "onResume: called")
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        Log.d(TAG, "onDestroyView: called")
     }
 }

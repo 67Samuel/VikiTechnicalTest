@@ -5,11 +5,11 @@ import com.samuel.vikitechnicaltest.business.domain.models.Country
 
 fun String.toCountry(rate: Float) : Country {
     return when(this) {
-        "AED" -> Country(name="Singapore", R.drawable.sgd, this, rate)
-        "AFN" -> Country(name="Singapore", R.drawable.sgd, this, rate)
-        "ALL" -> Country(name="Singapore", R.drawable.sgd, this, rate)
-        "AMD" -> Country(name="Singapore", R.drawable.sgd, this, rate)
-        "ANG" -> Country(name="Singapore", R.drawable.sgd, this, rate)
+        "AED" -> Country(name="Singapore", R.drawable.aed, this, rate)
+        "AFN" -> Country(name="Singapore", R.drawable.afn, this, rate)
+        "ALL" -> Country(name="Singapore", R.drawable.all, this, rate)
+        "AMD" -> Country(name="Singapore", R.drawable.amd, this, rate)
+        "ANG" -> Country(name="Singapore", R.drawable.ang, this, rate)
         "AOA" -> Country(name="Singapore", R.drawable.sgd, this, rate)
         "ARS" -> Country(name="Singapore", R.drawable.sgd, this, rate)
         "AUD" -> Country(name="Singapore", R.drawable.sgd, this, rate)
@@ -151,7 +151,7 @@ fun String.toCountry(rate: Float) : Country {
         "TZS" -> Country(name="Singapore", R.drawable.sgd, this, rate)
         "UAH" -> Country(name="Singapore", R.drawable.sgd, this, rate)
         "UGX" -> Country(name="Singapore", R.drawable.sgd, this, rate)
-        "USD" -> Country(name="Singapore", R.drawable.sgd, this, rate)
+        "USD" -> Country(name="Singapore", R.drawable.usd, this, rate)
         "UYU" -> Country(name="Singapore", R.drawable.sgd, this, rate)
         "UZS" -> Country(name="Singapore", R.drawable.sgd, this, rate)
         "VES" -> Country(name="Singapore", R.drawable.sgd, this, rate)
@@ -167,6 +167,6 @@ fun String.toCountry(rate: Float) : Country {
         "ZAR" -> Country(name="Singapore", R.drawable.sgd, this, rate)
         "ZMW" -> Country(name="Singapore", R.drawable.sgd, this, rate)
         "ZWL" -> Country(name="Singapore", R.drawable.sgd, this, rate)
-        else -> Country(name="Unknown", R.drawable.usd, this, rate)
+        else -> Country(name="Unknown", R.drawable.unknown, this, rate)
     }
 }

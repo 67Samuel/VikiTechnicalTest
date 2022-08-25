@@ -1,10 +1,5 @@
 package com.samuel.vikitechnicaltest.presentation.selectcountry
 
-import android.net.ConnectivityManager
-import android.net.ConnectivityManager.NetworkCallback
-import android.net.Network
-import android.net.NetworkCapabilities
-import android.net.NetworkRequest
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,6 +12,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
 import com.samuel.vikitechnicaltest.R
 import com.samuel.vikitechnicaltest.business.data.datastore.AppDataStore
 import com.samuel.vikitechnicaltest.business.domain.models.ConversionRates.Companion.getCountryCodes
@@ -26,8 +22,6 @@ import com.samuel.vikitechnicaltest.presentation.MainViewModel
 import com.samuel.vikitechnicaltest.presentation.home.HomeEvents
 import com.samuel.vikitechnicaltest.presentation.util.toCountry
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -40,8 +34,6 @@ class SelectCountryFragment : Fragment(R.layout.fragment_select_country),
     SelectCountryAdapter.Interaction {
     private val TAG: String = "SelectCountryFragmentDebug"
 
-    private lateinit var direction: SelectCountryEvents.CountryDirection
-
     private val viewModel: MainViewModel by activityViewModels()
 
     private lateinit var binding: FragmentSelectCountryBinding
@@ -49,11 +41,9 @@ class SelectCountryFragment : Fragment(R.layout.fragment_select_country),
     @Inject
     lateinit var datastoreManager: AppDataStore
 
-    private var mConnectivityManager: ConnectivityManager? = null
-    private var mNetworkCallback: NetworkCallback? = null
-
     private var recyclerAdapter: SelectCountryAdapter? = null // can leak memory so need to null
     private var countries = emptyList<Country>()
+    private lateinit var direction: SelectCountryEvents.CountryDirection
 
         override fun onCreateView(
         inflater: LayoutInflater,
@@ -90,52 +80,19 @@ class SelectCountryFragment : Fragment(R.layout.fragment_select_country),
 
     private fun subscribeObservers() {
         viewModel.selectCountryState.observe(viewLifecycleOwner) { state ->
-            Log.d(TAG, "subscribeObservers: state: $state")
             state.toastMessage?.let {
                 Toast.makeText(requireActivity(), it, Toast.LENGTH_LONG).show()
             }
 
-//            if (networkUtils.isOnline()) {
-//                if (state.countryList.isNotEmpty()) {
-//                    Log.d(TAG, "subscribeObservers: state.countryList is not empty")
-//                    recyclerAdapter?.apply {
-//                        countries = state.countryList
-//                        Log.d(TAG, "subscribeObservers: setting state.countryList to adapter")
-//                        submitList(countries)
-//                    }
-//                    Log.d(TAG, "subscribeObservers: saving state.countryList to local variable")
-//                }
-//            } else {
-//                Log.d(TAG, "subscribeObservers: we are offline")
-//                CoroutineScope(IO).launch {
-//                    val countryList = arrayListOf<Country>()
-//                    for (code in getCountryCodes()) {
-//                        val rate = datastoreManager.readValue(code)
-//                        rate?.let {
-//                            countryList.add(code.toCountry(it))
-//                        }
-//                        Log.d(TAG, "subscribeObservers: read rate: $rate")
-//                    }
-//                    if (countryList.isNotEmpty()) {
-//                        countries = countryList
-//                        recyclerAdapter?.apply {
-//                            Log.d(TAG, "onQueryTextSubmit: submitting offline list: $countries")
-//                            submitList(countries)
-//                        }
-//                        withContext(Main) {
-//                            Toast.makeText(requireActivity(),
-//                                "Internet connection not found.\nData may be outdated.",
-//                                Toast.LENGTH_LONG).show()
-//                        }
-//                    } else {
-//                        withContext(Main) {
-//                            Toast.makeText(requireActivity(),
-//                                "Internet connection not found.\nNo local data found.",
-//                                Toast.LENGTH_LONG).show()
-//                        }
-//                    }
-//                }
-//            }
+            if (state.countryList.isNotEmpty()) {
+                Log.d(TAG, "subscribeObservers: state.countryList is not empty")
+                recyclerAdapter?.apply {
+                    countries = state.countryList
+                    Log.d(TAG, "subscribeObservers: setting state.countryList to adapter")
+                    submitList(countries)
+                }
+            }
+
         }
     }
 
@@ -146,12 +103,9 @@ class SelectCountryFragment : Fragment(R.layout.fragment_select_country),
             override fun onQueryTextSubmit(query: String?): Boolean {
                 query?.let {
                     val filteredList = countries.stream()
-                        .peek { c -> Log.d(TAG, "onQueryTextSubmit: stream: $c") }
                         .filter { c -> (query.lowercase() in c.currencyCode.lowercase() || query.lowercase() in c.name.lowercase()) }
-                        .peek { c -> Log.d(TAG, "onQueryTextSubmit: filter: $c") }
                         .toList()
                     recyclerAdapter?.apply {
-                        Log.d(TAG, "onQueryTextSubmit: submitting list: $filteredList")
                         submitList(filteredList)
                     }
                 }
@@ -161,12 +115,9 @@ class SelectCountryFragment : Fragment(R.layout.fragment_select_country),
             override fun onQueryTextChange(newText: String?): Boolean {
                 newText?.let {
                     val filteredList = countries.stream()
-                        .peek { c -> Log.d(TAG, "onQueryTextChange: stream: $c") }
                         .filter { c -> (newText.lowercase() in c.currencyCode.lowercase() || newText.lowercase() in c.name.lowercase()) }
-                        .peek { c -> Log.d(TAG, "onQueryTextChange: filter: $c") }
                         .toList()
                     recyclerAdapter?.apply {
-                        Log.d(TAG, "onQueryTextChange: submitting list: $filteredList")
                         submitList(filteredList)
                     }
                 }
@@ -190,24 +141,48 @@ class SelectCountryFragment : Fragment(R.layout.fragment_select_country),
 
     override fun onResume() {
         super.onResume()
-        // handle network connection
+        // handle changes in network connection
         lifecycleScope.launch {
             viewModel.networkMonitor.isConnected.collect {
                 when (it) {
                     true -> {
-                        withContext(Main) {
-                            Toast.makeText(requireActivity(), "Connected!", Toast.LENGTH_LONG)
-                                .show()
-                        }
+                        // try to retrieve exchange rates if we don't have them yet
                         if (countries.isEmpty()) {
                             Log.d(TAG, "onResume: trying to retrieve exchange rates again")
                             viewModel.onTriggerHomeEvent(HomeEvents.RetrieveExchangeRates)
                         }
                     }
                     false -> {
-                        withContext(Main) {
-                            Toast.makeText(requireActivity(), "Not connected!", Toast.LENGTH_LONG)
-                                .show()
+                        // retrieve list of Country from DataStore
+                        val countryList = arrayListOf<Country>()
+                        for (code in getCountryCodes()) {
+                            val rate = datastoreManager.readValue(code)
+                            rate?.let {
+                                countryList.add(code.toCountry(rate))
+                            }
+                            Log.d(TAG, "subscribeObservers: read rate: $rate")
+                        }
+
+                        // if data is successfully retrieved, set list to the recyclerview
+                        if (countryList.isNotEmpty()) {
+                            countries = countryList
+                            recyclerAdapter?.apply {
+                                Log.d(TAG, "onQueryTextSubmit: submitting offline list: $countries")
+                                submitList(countries)
+                            }
+                            withContext(Main) {
+                                Toast.makeText(requireActivity(),
+                                    "Internet connection not found\nData may be outdated",
+                                    Toast.LENGTH_LONG).show()
+                            }
+                        } else {
+                            // if there is no data in DataStore, notify the user
+                            Snackbar.make(
+                                binding.root,
+                                "No local data found",
+                                Snackbar.LENGTH_INDEFINITE
+                            ).setAction("Noted") {
+                            }.show()
                         }
                     }
                 }
