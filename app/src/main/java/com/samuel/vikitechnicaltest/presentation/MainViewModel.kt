@@ -13,7 +13,7 @@ import com.samuel.vikitechnicaltest.presentation.home.HomeEvents
 import com.samuel.vikitechnicaltest.presentation.home.HomeEvents.RetrieveExchangeRates
 import com.samuel.vikitechnicaltest.presentation.home.HomeState
 import com.samuel.vikitechnicaltest.presentation.selectcountry.SelectCountryEvents
-import com.samuel.vikitechnicaltest.presentation.selectcountry.SelectCountryEvents.CountryDirection
+import com.samuel.vikitechnicaltest.presentation.selectcountry.SelectCountryEvents.*
 import com.samuel.vikitechnicaltest.presentation.selectcountry.SelectCountryState
 import com.samuel.vikitechnicaltest.presentation.util.toCountry
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -50,13 +50,26 @@ class MainViewModel @Inject constructor(
         }
     }
 
+
     fun onTriggerSelectCountryEvent(event: SelectCountryEvents) {
         when(event) {
-            is SelectCountryEvents.InitCountryList -> {
+            is InitCountryList -> {
                 initCountryList()
             }
-            is SelectCountryEvents.SelectCountry -> {
+            is SelectCountry -> {
                 selectCountry(event.direction, event.country)
+            }
+            is NetworkConnectionChanged -> {
+                onNetworkConnectionChanged(event.connected)
+            }
+        }
+    }
+
+    private fun onNetworkConnectionChanged(connected: Boolean) {
+        Log.d(TAG, "onNetworkConnectionLost: called")
+        selectCountryState.value?.let {
+            viewModelScope.launch {
+                _selectCountryState.value = selectCountryState.value!!.copy(networkConnected = connected)
             }
         }
     }
@@ -107,10 +120,10 @@ class MainViewModel @Inject constructor(
                 val response = try {
                     repository.getExchangeRates()
                 } catch (e: IOException) {
-                    Log.e(TAG, "retrieveExchangeRates: ", e)
+                    Log.e(TAG, "retrieveExchangeRates: IOException", e)
                     return@launch
                 } catch (e: HttpException) {
-                    Log.e(TAG, "retrieveExchangeRates: ", e)
+                    Log.e(TAG, "retrieveExchangeRates: HttpException", e)
                     return@launch
                 }
                 if (response.isSuccessful && response.body() != null) {

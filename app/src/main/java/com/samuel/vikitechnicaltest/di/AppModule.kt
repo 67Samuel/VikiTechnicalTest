@@ -1,13 +1,17 @@
 package com.samuel.vikitechnicaltest.di
 
 import android.app.Application
+import android.content.Context
+import android.net.ConnectivityManager
 import com.samuel.vikitechnicaltest.R
 import com.samuel.vikitechnicaltest.business.data.datastore.AppDataStore
 import com.samuel.vikitechnicaltest.business.data.datastore.AppDataStoreManager
 import com.samuel.vikitechnicaltest.business.data.network.Api
+import com.samuel.vikitechnicaltest.presentation.util.NetworkUtils
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -35,4 +39,16 @@ object AppModule {
         return AppDataStoreManager(application)
     }
 
+    @Singleton
+    @Provides
+    fun provideNetworkUtils(
+        context: Context,
+    ): NetworkUtils {
+        return NetworkUtils(context)
+    }
+
+    @Singleton
+    @Provides
+    fun provideConnectivityManager(@ApplicationContext context: Context): ConnectivityManager =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 }

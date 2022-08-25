@@ -1,13 +1,15 @@
 package com.samuel.vikitechnicaltest.presentation.selectcountry
 
+import android.text.BoringLayout
 import com.samuel.vikitechnicaltest.business.domain.models.Country
 
 data class SelectCountryState(
     val countryList: List<Country> = emptyList(),
     val toastMessage: String? = null,
-    val query: String = ""
+    val query: String = "",
+    val networkConnected: Boolean = true
 ) {
     override fun toString(): String {
-        return "SelectCountryState(countryList=$countryList, toastMessage=$toastMessage, query='$query')"
+        return "SelectCountryState(countryList=$countryList, toastMessage=$toastMessage, query='$query', networkConnected=$networkConnected)"
     }
 }

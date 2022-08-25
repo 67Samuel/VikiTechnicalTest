@@ -28,7 +28,6 @@ class AppDataStoreManager(
     ) {
         scope.launch {
             context.dataStore.edit {
-//                Log.d(TAG, "setValue: saving $key to $value")
                 it[stringPreferencesKey(key)] = value.toString()
             }
         }
@@ -37,7 +36,6 @@ class AppDataStoreManager(
     override suspend fun readValue(
         key: String,
     ): Float? {
-//        Log.d(TAG, "readValue: pref: ${context.dataStore.data.first()}")
         return context.dataStore.data.first()[stringPreferencesKey(key)]?.toFloat()
     }
 
