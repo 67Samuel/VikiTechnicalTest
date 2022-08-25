@@ -6,7 +6,6 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.WindowManager
-import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -28,7 +27,7 @@ import kotlin.math.roundToInt
 
 @AndroidEntryPoint
 class HomeFragment() : Fragment(com.samuel.vikitechnicaltest.R.layout.fragment_home){
-    private val TAG: String = "MainFragmentDebug"
+    private val TAG: String = "HomeFragmentDebug"
     
     private val viewModel: MainViewModel by activityViewModels()
 
@@ -44,12 +43,12 @@ class HomeFragment() : Fragment(com.samuel.vikitechnicaltest.R.layout.fragment_h
         binding.fromCountry.root.setOnClickListener {
             Log.d(TAG, "onViewCreated: going to select from country")
             val bundle = bundleOf("direction" to SelectCountryEvents.CountryDirection.FROM.name)
-            findNavController().navigate(com.samuel.vikitechnicaltest.R.id.action_mainFragment_to_selectCountryFragment, bundle)
+            findNavController().navigate(com.samuel.vikitechnicaltest.R.id.action_homeFragment_to_selectCountryFragment, bundle)
         }
         binding.toCountry.root.setOnClickListener {
             Log.d(TAG, "onViewCreated: going to select to country")
             val bundle = bundleOf("direction" to SelectCountryEvents.CountryDirection.TO.name)
-            findNavController().navigate(com.samuel.vikitechnicaltest.R.id.action_mainFragment_to_selectCountryFragment, bundle)
+            findNavController().navigate(com.samuel.vikitechnicaltest.R.id.action_homeFragment_to_selectCountryFragment, bundle)
         }
         binding.inputCard.editText.onSubmit {
             Log.d(TAG, "onSubmit: called")
@@ -85,7 +84,7 @@ class HomeFragment() : Fragment(com.samuel.vikitechnicaltest.R.layout.fragment_h
                     readValue(fromCountryCode)?.let { fromExchangeRate ->
                         readValue(toCountryCode)?.let { toExchangeRate ->
                             val fromAmount = (number * 100f).roundToInt() / 100f
-                            val toAmount = ((number / fromExchangeRate) * toExchangeRate * 100f).roundToInt() / 100f
+                            val toAmount = ((number * fromExchangeRate) / toExchangeRate * 100f).roundToInt() / 100f
                             Log.d(TAG,
                                 "calculateAndShowConversion: number: $number, fromExchangeRate: $fromExchangeRate," +
                                         " toExchangeRate: $toExchangeRate, toAmount: $toAmount")

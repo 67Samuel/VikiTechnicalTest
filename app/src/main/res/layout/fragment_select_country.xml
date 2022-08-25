@@ -68,7 +68,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Select country"
+        android:text="Convert From"
         android:textColor="@color/black"
         android:textSize="25sp"
         android:textStyle="bold"
@@ -82,6 +82,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:iconifiedByDefault="false"
+        android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
         app:searchIcon="@drawable/ic_search"
         android:elevation="@dimen/cardview_default_elevation"
         android:visibility="visible"

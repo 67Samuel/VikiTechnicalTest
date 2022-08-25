@@ -23,11 +23,11 @@ class SelectCountryAdapter(private val interaction: Interaction? = null) :
     val DIFF_CALLBACK = object : DiffUtil.ItemCallback<Country>() {
 
         override fun areItemsTheSame(oldItem: Country, newItem: Country): Boolean {
-            TODO("not implemented")
+            return oldItem.currencyCode == newItem.currencyCode
         }
 
         override fun areContentsTheSame(oldItem: Country, newItem: Country): Boolean {
-            TODO("not implemented")
+            return oldItem.rate == newItem.rate
         }
 
     }

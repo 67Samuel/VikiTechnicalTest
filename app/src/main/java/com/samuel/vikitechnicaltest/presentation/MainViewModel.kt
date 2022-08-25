@@ -1,18 +1,16 @@
 package com.samuel.vikitechnicaltest.presentation
 
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.samuel.vikitechnicaltest.business.data.datastore.AppDataStore
-import com.samuel.vikitechnicaltest.business.domain.models.ConversionRates
 import com.samuel.vikitechnicaltest.business.domain.models.ConversionRates.Companion.getCountryCodes
 import com.samuel.vikitechnicaltest.business.domain.models.Country
 import com.samuel.vikitechnicaltest.business.domain.repository.Repository
 import com.samuel.vikitechnicaltest.presentation.home.HomeEvents
-import com.samuel.vikitechnicaltest.presentation.home.HomeEvents.GetExchangeRates
+import com.samuel.vikitechnicaltest.presentation.home.HomeEvents.RetrieveExchangeRates
 import com.samuel.vikitechnicaltest.presentation.home.HomeState
 import com.samuel.vikitechnicaltest.presentation.selectcountry.SelectCountryEvents
 import com.samuel.vikitechnicaltest.presentation.selectcountry.SelectCountryEvents.CountryDirection
@@ -20,12 +18,11 @@ import com.samuel.vikitechnicaltest.presentation.selectcountry.SelectCountryStat
 import com.samuel.vikitechnicaltest.presentation.util.toCountry
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
-import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
-import kotlin.reflect.full.declaredMemberProperties
+import kotlin.streams.toList
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
@@ -42,18 +39,18 @@ class MainViewModel @Inject constructor(
     val selectCountryState: LiveData<SelectCountryState> = _selectCountryState
 
     init {
-        onTriggerMainEvent(GetExchangeRates)
+        onTriggerHomeEvent(RetrieveExchangeRates)
     }
 
-    fun onTriggerMainEvent(event: HomeEvents) {
+    fun onTriggerHomeEvent(event: HomeEvents) {
         when(event) {
-            is GetExchangeRates -> {
-                getExchangeRates()
+            is RetrieveExchangeRates -> {
+                retrieveExchangeRates()
             }
         }
     }
 
-    fun onTriggerMainEvent(event: SelectCountryEvents) {
+    fun onTriggerSelectCountryEvent(event: SelectCountryEvents) {
         when(event) {
             is SelectCountryEvents.InitCountryList -> {
                 initCountryList()
@@ -84,7 +81,7 @@ class MainViewModel @Inject constructor(
                         // create country list from data in datastore
                         val countryList = ArrayList<Country>()
                         for (countryCode in getCountryCodes()) {
-                            val country = countryCode.toCountry()
+                            val country = countryCode.toCountry(1f)
                             countryList.add(country)
                         }
                         _selectCountryState.value = selectCountryState.value!!.copy(countryList = countryList)
@@ -99,30 +96,39 @@ class MainViewModel @Inject constructor(
     }
 
 
-    private fun getExchangeRates() {
-        homeState.value?.let {
+    /**
+     * Retrieves exchange rate data from network.
+     * Data is then stored in DataStore for offline use and in a list for current use.
+     * If no data is returned, app should search for data in DataStore.
+     */
+    private fun retrieveExchangeRates() {
+        selectCountryState.value?.let {
             viewModelScope.launch {
                 val response = try {
                     repository.getExchangeRates()
                 } catch (e: IOException) {
-                    Log.e(TAG, "getExchangeRates: ", e)
+                    Log.e(TAG, "retrieveExchangeRates: ", e)
                     return@launch
                 } catch (e: HttpException) {
-                    Log.e(TAG, "getExchangeRates: ", e)
+                    Log.e(TAG, "retrieveExchangeRates: ", e)
                     return@launch
                 }
                 if (response.isSuccessful && response.body() != null) {
                     response.body()?.let { body ->
-                        Log.d(TAG, "getExchangeRates: number of countries (getCountryCodeRateList): ${body.conversion_rates.getCountryCodeRateList().size}")
-                        Log.d(TAG, "getExchangeRates: number of countries (getRatesList): ${body.conversion_rates.getRatesList().size}")
-                        Log.d(TAG, "getExchangeRates: number of countries (getCountryCodes): ${getCountryCodes().size}")
-                        for ((countryCode, rate) in body.conversion_rates.getCountryCodeRateList()) {
-                            // save to datastore
-                            datastoreManager.setValue(countryCode, rate)
-                        }
+                        val countriesList = body.conversion_rates.getCountryCodeRateList().stream()
+                                // save to datastore for offline use
+                            .peek { v -> datastoreManager.setValue(v.first, v.second) }
+                                // save to list for current use (this violates the single source of truth principle, so maybe I shouldn't do it, but let's see the performance difference first)
+                            .map { v -> v.first.toCountry(v.second) }
+                                // for debugging
+//                            .limit(10)
+                            .toList()
+                        Log.d(TAG, "retrieveExchangeRates: countriesList size: ${countriesList.size}")
+                        // selectCountryState.value should not be null because we checked it earlier and the state should persist beyond Android lifecycles
+                        _selectCountryState.value = selectCountryState.value!!.copy(countryList = countriesList)
                     }
                 } else {
-                    Log.d(TAG, "getExchangeRates: response is not successful")
+                    Log.d(TAG, "retrieveExchangeRates: response is not successful")
                 }
             }
         }
