@@ -18,12 +18,12 @@ The assignment is to create a simple currency converter app, as if it were a rea
 For the purpose of ease of maintainance and extension, the app should be modular and well documented (to keep the code neat and understandable), reduce coupling through dependency injection and coding against interfaces.
 
 ## Architecture
-Clean Architecture (this is recommended by Android and therefore are more familiar with this) with MVVM.
+Clean Architecture (this is recommended by Android and therefore are more familiar with this) with MVI.
 
 ### Packages
 business: datasources and domain
 di: dependency injection (using Hilt)
-presentation: using MVVM
+presentation: using MVI
 
 ### Database
 Local database (using Datastore because we only want to store a small amount of data) so that we can get responses even when offline (must inform user that we are using potentially stale data)
