@@ -15,6 +15,7 @@ import com.samuel.vikitechnicaltest.presentation.home.HomeState
 import com.samuel.vikitechnicaltest.presentation.selectcountry.SelectCountryEvents
 import com.samuel.vikitechnicaltest.presentation.selectcountry.SelectCountryEvents.*
 import com.samuel.vikitechnicaltest.presentation.selectcountry.SelectCountryState
+import com.samuel.vikitechnicaltest.presentation.util.network.NetworkMonitor
 import com.samuel.vikitechnicaltest.presentation.util.toCountry
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
@@ -27,7 +28,8 @@ import kotlin.streams.toList
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val repository: Repository,
-    private val datastoreManager: AppDataStore
+    private val datastoreManager: AppDataStore,
+    val networkMonitor: NetworkMonitor
 ) : ViewModel() {
 
     private val TAG: String = "MainViewModelDebug"
@@ -69,7 +71,7 @@ class MainViewModel @Inject constructor(
         Log.d(TAG, "onNetworkConnectionLost: called")
         selectCountryState.value?.let {
             viewModelScope.launch {
-                _selectCountryState.value = selectCountryState.value!!.copy(networkConnected = connected)
+
             }
         }
     }

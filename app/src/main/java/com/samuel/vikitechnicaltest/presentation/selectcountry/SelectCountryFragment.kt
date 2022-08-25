@@ -14,6 +14,7 @@ import android.widget.SearchView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.samuel.vikitechnicaltest.R
@@ -22,6 +23,7 @@ import com.samuel.vikitechnicaltest.business.domain.models.ConversionRates.Compa
 import com.samuel.vikitechnicaltest.business.domain.models.Country
 import com.samuel.vikitechnicaltest.databinding.FragmentSelectCountryBinding
 import com.samuel.vikitechnicaltest.presentation.MainViewModel
+import com.samuel.vikitechnicaltest.presentation.home.HomeEvents
 import com.samuel.vikitechnicaltest.presentation.util.toCountry
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -47,8 +49,6 @@ class SelectCountryFragment : Fragment(R.layout.fragment_select_country),
     @Inject
     lateinit var datastoreManager: AppDataStore
 
-//    @Inject
-//    lateinit var networkUtils: NetworkUtils
     private var mConnectivityManager: ConnectivityManager? = null
     private var mNetworkCallback: NetworkCallback? = null
 
@@ -190,54 +190,34 @@ class SelectCountryFragment : Fragment(R.layout.fragment_select_country),
 
     override fun onResume() {
         super.onResume()
-        requestNetwork()
-//        networkUtils.registerNetworkCallback(viewModel::onTriggerSelectCountryEvent)
-    }
-
-    private fun requestNetwork() {
-        unregisterNetworkCallback()
-        Log.d(TAG, "requestHighBandwidthNetwork: called")
-
-        // Requesting an unmetered network may prevent you from connecting to the cellular
-        // network on the user's watch or phone; however, unless you explicitly ask for permission
-        // to a access the user's cellular network, you should request an unmetered network.
-        val request = NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-            .build()
-        mNetworkCallback = object : NetworkCallback() {
-            override fun onAvailable(network: Network) {
-                viewModel.onTriggerSelectCountryEvent(SelectCountryEvents.NetworkConnectionChanged(true))
-            }
-
-            override fun onLost(network: Network) {
-                viewModel.onTriggerSelectCountryEvent(SelectCountryEvents.NetworkConnectionChanged(false))
-                CoroutineScope(Main).launch {
-                    Toast.makeText(requireActivity(), "Internet connection not found.\nData may be outdated.", Toast.LENGTH_LONG).show()
+        // handle network connection
+        lifecycleScope.launch {
+            viewModel.networkMonitor.isConnected.collect {
+                when (it) {
+                    true -> {
+                        withContext(Main) {
+                            Toast.makeText(requireActivity(), "Connected!", Toast.LENGTH_LONG)
+                                .show()
+                        }
+                        if (countries.isEmpty()) {
+                            Log.d(TAG, "onResume: trying to retrieve exchange rates again")
+                            viewModel.onTriggerHomeEvent(HomeEvents.RetrieveExchangeRates)
+                        }
+                    }
+                    false -> {
+                        withContext(Main) {
+                            Toast.makeText(requireActivity(), "Not connected!", Toast.LENGTH_LONG)
+                                .show()
+                        }
+                    }
                 }
             }
         }
-
-        // requires android.permission.CHANGE_NETWORK_STATE
-        mConnectivityManager?.apply {
-            requestNetwork(request, mNetworkCallback as NetworkCallback)
-        }
     }
+
 
     override fun onPause() {
         super.onPause()
-        unregisterNetworkCallback()
     }
 
-    private fun unregisterNetworkCallback() {
-        mNetworkCallback?.let { networkCallback ->
-            Log.d(TAG, "unregisterNetworkCallback: going to unregister now")
-            mConnectivityManager?.apply {
-                unregisterNetworkCallback(networkCallback)
-                mNetworkCallback = null
-            }
-        }
-    }
 }

@@ -5,6 +5,10 @@ import android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET
 import android.os.Build
 import androidx.annotation.RequiresApi
 
+/**
+ * Credit: https://medium.com/@bazzairvine/observing-your-network-connection-with-flow-1cdedf31780c
+ */
+
 object ConnectedCompat {
 
     private val IMPL: ConnectedCompatImpl

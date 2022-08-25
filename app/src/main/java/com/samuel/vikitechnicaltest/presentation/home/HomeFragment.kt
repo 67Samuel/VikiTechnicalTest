@@ -70,6 +70,10 @@ class HomeFragment() : Fragment(com.samuel.vikitechnicaltest.R.layout.fragment_h
         // bring up the soft keyboard on start
         binding.inputCard.editText.requestFocus()
         requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+
+//        collectLatestLifecycleFlow(viewModel.networkMonitor.isConnected as StateFlow<Boolean>) {
+//            Toast.makeText(requireActivity(), "Connected: $it", Toast.LENGTH_LONG).show()
+//        }
     }
 
     private suspend fun calculateAndShowConversion() {
